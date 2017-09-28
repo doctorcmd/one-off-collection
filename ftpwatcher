@@ -1,0 +1,33 @@
+#!/bin/bash
+# chkconfig: 234 99 01
+
+start() {
+	if [ ! -f /var/log/ftp/ftpcommands.log ]; then
+		This file needs to exist if the phishwatcher process is going to run,
+		# but it doesn't get created until an FTP command is issued
+		touch /var/log/ftp/ftpcommands.log
+	fi
+		/usr/bin/pkill -f /tools/scripts/admin/ftpwatcher.pl
+		/bin/rm /var/run/ftpwatcher.pid 2>/dev/null
+		/usr/bin/perl /tools/scripts/admin/ftpwatcher.pl < /dev/null > /dev/null 2>&1 &
+}
+
+stop() {
+    kill "$(cat /var/run/ftpwatcher.pid)" 2>/dev/null
+}
+
+case "$1" in
+        start)
+				start
+                ;;
+        stop)
+                stop
+                ;;
+        restart)
+                stop
+                start
+                ;;
+        *)
+                echo "Usage: $0 <start|stop|restart>"
+                ;;
+esac
